@@ -1,0 +1,7 @@
+Running: xsim.dir/am2901_behav/xsimk.exe -simmode gui -wdb am2901_behav.wdb -simrunnum 0 -socket 63574
+Design successfully loaded
+Design Loading Memory Usage: 10424 KB (Peak: 10424 KB)
+Design Loading CPU Usage: 15 ms
+Simulation completed
+Simulation Memory Usage: 11028 KB (Peak: 11028 KB)
+Simulation CPU Usage: 46 ms
