@@ -1,0 +1,13 @@
+0.7
+2020.2
+Oct 14 2022
+05:20:55
+C:/Users/student/temp/project_1/project_1.sim/sim_1/behav/xsim/glbl.v,1665704903,verilog,,,,glbl,,,,,,,,
+C:/Users/student/temp/project_1/project_1.srcs/sources_1/new/cnt.v,1783676886,verilog,,C:/Users/student/temp/project_1/project_1.srcs/sources_1/new/lshr.v,,cnt,,,,,,,,
+C:/Users/student/temp/project_1/project_1.srcs/sources_1/new/lshr.v,1783676886,verilog,,C:/Users/student/temp/project_1/project_1.srcs/sources_1/new/mux21.v,,lshr,,,,,,,,
+C:/Users/student/temp/project_1/project_1.srcs/sources_1/new/mux21.v,1783676886,verilog,,C:/Users/student/temp/project_1/project_1.srcs/sources_1/new/reg_pl.v,,mux21,,,,,,,,
+C:/Users/student/temp/project_1/project_1.srcs/sources_1/new/reg_pl.v,1783676886,verilog,,C:/Users/student/temp/project_1/project_1.srcs/sources_1/new/top_system.v,,reg_pl,,,,,,,,
+C:/Users/student/temp/project_1/project_1.srcs/sources_1/new/tb_top_sistem.v,1783676886,verilog,,,,tb_top_sistem,,,,,,,,
+C:/Users/student/temp/project_1/project_1.srcs/sources_1/new/tb_top_system.v,1783677515,verilog,,,,tb_top_system,,,,,,,,
+C:/Users/student/temp/project_1/project_1.srcs/sources_1/new/top_sistem.v,1783676886,verilog,,C:/Users/student/temp/project_1/project_1.srcs/sources_1/new/tb_top_sistem.v,,top_sistem,,,,,,,,
+C:/Users/student/temp/project_1/project_1.srcs/sources_1/new/top_system.v,1783677515,verilog,,C:/Users/student/temp/project_1/project_1.srcs/sources_1/new/tb_top_system.v,,top_system,,,,,,,,
