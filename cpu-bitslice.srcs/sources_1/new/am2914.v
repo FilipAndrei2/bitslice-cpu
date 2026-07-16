@@ -1,7 +1,6 @@
 `timescale 1ns / 1ps
 
 /*
-
         Acest VPIC primeste 8 interrupt input requests pe liniile P[7:0].
     Un registru masca este folosit pentru a izola intreruperi specifice.
     Requesturile de pe liniile P sunt AND-uite cu bitii din registrul de masca si output-ul este oferit unui priority encoder 8-bit,
@@ -48,7 +47,7 @@ module am2914(
     inout [7:0]M,
     
     // Pentru citirea externa a registrului de status
-    inout [3:0]S,
+    inout [3:0] S,
     
     output status_overflow_not,
     
@@ -61,6 +60,12 @@ module am2914(
     output parallel_disable,
     output reg interrupt_req_not
 );
+
+reg [3:0] s_out; 
+assign S = s_out;
+
+reg [7:0] m_out;
+assign M = m_out;
 
 // posedge triggered
 reg [7:0]interrupt;
@@ -82,7 +87,13 @@ reg [2:0] last_vector;
 
 reg [2:0] highest_prio_req;
 
-always @(mask or interrupt) begin
+reg irq_enabled;
+
+wire request_pending;
+assign request_pending = (highest_prio_req !== 3'bxxx) &&
+                         (highest_prio_req >= status);
+
+always @(*) begin
 
     if      (mask[7] && interrupt[7] )  highest_prio_req = 3'b111;
     else if (mask[6] && interrupt[6])   highest_prio_req = 3'b110;
@@ -96,7 +107,15 @@ always @(mask or interrupt) begin
 end
 
 always @(*) begin
-case (I[3:0]) 
+
+    if (!irq_enabled) begin
+        interrupt_req_not = 1'b1;
+    end else if (request_pending) begin
+        interrupt_req_not = 1'b0;
+    end else begin
+        interrupt_req_not = 1'b1;
+    end
+    case (I[3:0]) 
             
             /*
                 MCLR - MASTER CLEAR 
@@ -144,7 +163,7 @@ always @(posedge clk) begin
             case (I[3:0]) 
             
                 /*
-                    MCLR - MASTER CLEAR 
+                    0. MCLR - MASTER CLEAR 
                     Clear all interrupts, clear mask register, clear status register, enable irq
                 */
                 4'b0000 : begin
@@ -152,11 +171,11 @@ always @(posedge clk) begin
                     mask <= 0;
                     status <= 0;
                     
-                    interrupt_req_not <= 1;
+                    irq_enabled <= 1;
                 end
                 
                 /*
-                    CLRIN - CLEAR ALL INTERRUPTS
+                    1. CLRIN - CLEAR ALL INTERRUPTS
                     
                 */
                 4'b0001 : begin
@@ -164,28 +183,28 @@ always @(posedge clk) begin
                 end
                 
                 /*
-                    CLRMB - Clear interrupts from M-Bus
+                    2. CLRMB - Clear interrupts from M-Bus
                 */
                 4'b0010 : begin
                     interrupt <= ~M & interrupt;
                 end
                 
                 /*
-                    CLRMR - Clear interrupts from mask register
+                    3. CLRMR - Clear interrupts from mask register
                 */
                 4'b0011 : begin
                     interrupt <= ~mask & interrupt;
                 end
                 
                 /*
-                    CLRVC - Clear individual interrupts asociated with last vector read
+                    4. CLRVC - Clear individual interrupt asociated with last vector read
                 */
                 4'b0100 : begin
                     interrupt[last_vector] = 1'b0;
                 end
                 
                 /*
-                    READVC - Read Vector
+                    5. READVC - Read Vector
                 */
                 4'b0101 : begin
                     status <= highest_prio_req + 1;
@@ -193,10 +212,79 @@ always @(posedge clk) begin
                 end
                 
                 /*
-                    LOADSR - Load Status Register from S-Bus
+                    6. RDSTA - Read Status Register to S-Bus
                 */
                 4'b0110 : begin
+                    s_out <= status;
+                end
+                
+                /*
+                    7. RDM - Read Mask register to M-Bus
+                */
+                4'b0111 : begin
+                    m_out <= mask;
+                end
+                
+                /*
+                    8. SETM - Set Mask register (inhibits all interrupts)
+                    Seteaza toti bitii in registrul de masca pe 1
+                */
+                4'b1000 : begin
+                    mask <= 8'b11111111;
+                end
+                
+                /*
+                    9. LDSTA - Load Status register from S Bus (and LGE flip-flop from GE input)
+                */
+                4'b1001 : begin
                     status <= S;
+                end
+                
+                /*
+                    10. BCLRM - Bit clear mask register from M-Bus
+                    Curata bitii din registrul de masca care au biti corespunzatori de 1 pe magistrala M 
+                    Bitii din registrul de masca care au biti corespunzatori de 0 pe magistrala M raman neafectati.
+                */
+                4'b1010 : begin
+                    mask <= mask & (~M);
+                end
+                
+                /*
+                    11. BSETM - Bit set mask register from M bus
+                    Seteaza biti in registrul de masca care au biti corespunzatori de 1 pe magistrala M. Ceilalti biti raman neafectati.
+                */
+                4'b1011 : begin
+                    mask <= mask | M;
+                end
+                
+                /*
+                    12. CLRM - Clear mask register
+                    Seteaza toti bitii din registrul de masca pe 0
+                */
+                4'b1100 : begin
+                    mask <= 8'b00000000;
+                end
+                
+                /*
+                    13. DISIN - Disable interrupt request
+                    
+                */
+                4'b1101 : begin
+                    irq_enabled <= 1'b0;
+                end
+                
+                /*
+                    14. LDM - Load mask register from M-Bus
+                */
+                4'b1110 : begin
+                    mask <= M;
+                end
+                
+                /*
+                    15. ENIN - Enable interrupt request
+                */
+                4'b1111 : begin
+                    irq_enabled <= 1'b1;
                 end
         endcase
   end  
